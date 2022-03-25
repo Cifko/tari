@@ -349,6 +349,7 @@ impl SendTab {
                         }
                     },
                 }
+            } else {
             }
         }
 
@@ -600,6 +601,7 @@ impl<B: Backend> Component<B> for SendTab {
                 self.selected_unique_id = Some(Vec::from(tokens[index - 1].unique_id()));
                 self.table_state.select(Some(index - 1));
             }
+        } else {
         }
     }
 
@@ -621,6 +623,7 @@ impl<B: Backend> Component<B> for SendTab {
                 self.selected_unique_id = Some(Vec::from(tokens[index].unique_id()));
                 self.table_state.select(Some(index));
             }
+        } else {
         }
     }
 
