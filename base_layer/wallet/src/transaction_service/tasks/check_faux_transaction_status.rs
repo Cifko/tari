@@ -92,7 +92,7 @@ pub async fn check_faux_transactions<TBackend: 'static + TransactionBackend>(
         "Checking {} faux transaction statuses",
         all_faux_transactions.len()
     );
-    for tx in all_faux_transactions.into_iter() {
+    for tx in all_faux_transactions {
         let (status, mined_height, block_hash) = match output_manager.get_output_statuses_by_tx_id(tx.tx_id).await {
             Ok(s) => s,
             Err(e) => {
