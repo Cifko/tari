@@ -20,7 +20,7 @@
 // WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-use std::io::stdout;
+use std::{convert::TryFrom, io::stdout};
 
 use chrono::{Datelike, Utc};
 use crossterm::{execute, terminal::SetSize};
@@ -113,7 +113,10 @@ fn resize_terminal_to_fit_the_box(width: usize, height: usize) {
 
 /// Prints a pretty banner on the console as well as the list of available commands
 pub fn print_banner(commands: Vec<String>, chunk_size: i32) {
-    let chunks: Vec<Vec<String>> = commands.chunks(chunk_size as usize).map(|x| x.to_vec()).collect();
+    let chunks: Vec<Vec<String>> = commands
+        .chunks(usize::try_from(chunk_size).unwrap())
+        .map(|x| x.to_vec())
+        .collect();
     let mut cell_sizes = Vec::new();
 
     let mut row_cell_count: i32 = 0;
@@ -137,7 +140,10 @@ pub fn print_banner(commands: Vec<String>, chunk_size: i32) {
         command_data.push(cells);
     }
 
-    let row_cell_sizes: Vec<Vec<usize>> = cell_sizes.chunks(chunk_size as usize).map(|x| x.to_vec()).collect();
+    let row_cell_sizes: Vec<Vec<usize>> = cell_sizes
+        .chunks(usize::try_from(chunk_size).unwrap())
+        .map(|x| x.to_vec())
+        .collect();
     let mut row_cell_size = Vec::new();
     let mut max_cell_size: usize = 0;
     for sizes in row_cell_sizes {
