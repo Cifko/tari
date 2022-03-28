@@ -833,8 +833,8 @@ pub async fn command_runner(
             },
             MintTokens => {
                 println!("Minting tokens for asset");
-                let public_key = match parsed.args[0] {
-                    ParsedArgument::PublicKey(ref key) => Ok(key.clone()),
+                let public_key = match parsed.args.get(0) {
+                    Some(ParsedArgument::PublicKey(ref key)) => Ok(key.clone()),
                     _ => Err(CommandError::Argument),
                 }?;
 
@@ -868,13 +868,13 @@ pub async fn command_runner(
             },
             CreateInitialCheckpoint => {
                 println!("Creating Initial Checkpoint for Asset");
-                let asset_public_key = match parsed.args[0] {
-                    ParsedArgument::PublicKey(ref key) => Ok(key.clone()),
+                let asset_public_key = match parsed.args.get(0) {
+                    Some(ParsedArgument::PublicKey(ref key)) => Ok(key.clone()),
                     _ => Err(CommandError::Argument),
                 }?;
 
-                let merkle_root = match parsed.args[1] {
-                    ParsedArgument::Text(ref root) => {
+                let merkle_root = match parsed.args.get(1) {
+                    Some(ParsedArgument::Text(ref root)) => {
                         let bytes = match &root[0..2] {
                             "0x" => Vec::<u8>::from_hex(&root[2..]).map_err(|_| CommandError::Argument)?,
                             _ => Vec::<u8>::from_hex(root).map_err(|_| CommandError::Argument)?,
@@ -895,8 +895,8 @@ pub async fn command_runner(
                     .await?;
             },
             CreateCommitteeDefinition => {
-                let asset_public_key = match parsed.args[0] {
-                    ParsedArgument::PublicKey(ref key) => Ok(key.clone()),
+                let asset_public_key = match parsed.args.get(0) {
+                    Some(ParsedArgument::PublicKey(ref key)) => Ok(key.clone()),
                     _ => Err(CommandError::Argument),
                 }?;
                 let public_key_hex = asset_public_key.to_hex();
