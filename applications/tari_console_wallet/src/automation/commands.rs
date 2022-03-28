@@ -115,7 +115,7 @@ pub enum TransactionStage {
 pub struct SentTransaction {}
 
 fn get_transaction_parameters(args: Vec<ParsedArgument>) -> Result<(MicroTari, PublicKey, String), CommandError> {
-    use ParsedArgument::*;
+    use ParsedArgument::{Amount, PublicKey, Text};
     let amount = match args[0].clone() {
         Amount(mtari) => Ok(mtari),
         _ => Err(CommandError::Argument),
@@ -137,7 +137,7 @@ fn get_transaction_parameters(args: Vec<ParsedArgument>) -> Result<(MicroTari, P
 fn get_init_sha_atomic_swap_parameters(
     args: Vec<ParsedArgument>,
 ) -> Result<(MicroTari, PublicKey, String), CommandError> {
-    use ParsedArgument::*;
+    use ParsedArgument::{Amount, PublicKey, Text};
     let amount = match args[0].clone() {
         Amount(mtari) => Ok(mtari),
         _ => Err(CommandError::Argument),
@@ -190,7 +190,7 @@ pub async fn finalise_sha_atomic_swap(
     mut transaction_service: TransactionServiceHandle,
     args: Vec<ParsedArgument>,
 ) -> Result<TxId, CommandError> {
-    use ParsedArgument::*;
+    use ParsedArgument::{Hash, PublicKey};
     let output = match args[0].clone() {
         Hash(output) => Ok(output),
         _ => Err(CommandError::Argument),
@@ -215,7 +215,7 @@ pub async fn claim_htlc_refund(
     mut transaction_service: TransactionServiceHandle,
     args: Vec<ParsedArgument>,
 ) -> Result<TxId, CommandError> {
-    use ParsedArgument::*;
+    use ParsedArgument::Hash;
     let output = match args[0].clone() {
         Hash(output) => Ok(output),
         _ => Err(CommandError::Argument),
@@ -248,7 +248,7 @@ pub async fn coin_split(
     output_service: &mut OutputManagerHandle,
     transaction_service: &mut TransactionServiceHandle,
 ) -> Result<TxId, CommandError> {
-    use ParsedArgument::*;
+    use ParsedArgument::{Amount, Int};
     let amount_per_split = match args[0] {
         Amount(s) => Ok(s),
         _ => Err(CommandError::Argument),
@@ -323,7 +323,7 @@ pub async fn discover_peer(
     mut dht_service: DhtDiscoveryRequester,
     args: Vec<ParsedArgument>,
 ) -> Result<(), CommandError> {
-    use ParsedArgument::*;
+    use ParsedArgument::PublicKey;
     let dest_public_key = match args[0].clone() {
         PublicKey(key) => Ok(key),
         _ => Err(CommandError::Argument),
@@ -355,7 +355,7 @@ pub async fn make_it_rain(
     fee_per_gram: u64,
     args: Vec<ParsedArgument>,
 ) -> Result<(), CommandError> {
-    use ParsedArgument::*;
+    use ParsedArgument::{Amount, Date, Float, Int, Negotiated, PublicKey, Text};
 
     let txps = match args[0].clone() {
         Float(r) => Ok(r),
@@ -660,6 +660,8 @@ pub async fn command_runner(
     println!("==============");
     println!("Command Runner");
     println!("==============");
+
+    #[allow(clippy::enum_glob_use)]
     use WalletCommand::*;
     let wallet_config = config.wallet_config.clone().unwrap_or_default();
     for (idx, parsed) in commands.into_iter().enumerate() {
