@@ -1341,9 +1341,10 @@ impl tari_rpc::base_node_server::BaseNode for BaseNodeGrpcServer {
             _ => tari_rpc::SyncProgressResponse {
                 tip_height: 0,
                 local_height: 0,
-                state: match state.is_synced() {
-                    true => tari_rpc::SyncState::Done.into(),
-                    false => tari_rpc::SyncState::Startup.into(),
+                state: if state.is_synced() {
+                    tari_rpc::SyncState::Done.into()
+                } else {
+                    tari_rpc::SyncState::Startup.into()
                 },
             },
         };
