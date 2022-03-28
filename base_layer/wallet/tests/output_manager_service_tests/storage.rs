@@ -134,7 +134,7 @@ pub fn test_db_backend<T: OutputManagerBackend + 'static>(backend: T) {
         .fold(MicroTari::from(0), |acc, x| acc + x.unblinded_output.value);
     let mut pending_incoming_balance = MicroTari(0);
     let mut pending_outgoing_balance = MicroTari(0);
-    for v in pending_txs.iter() {
+    for v in &pending_txs {
         pending_outgoing_balance += v
             .outputs_to_be_spent
             .iter()
@@ -161,7 +161,7 @@ pub fn test_db_backend<T: OutputManagerBackend + 'static>(backend: T) {
         pending_outgoing_balance
     });
 
-    for v in pending_txs.iter() {
+    for v in &pending_txs {
         runtime.block_on(db.confirm_encumbered_outputs(v.tx_id)).unwrap();
     }
 
@@ -175,13 +175,13 @@ pub fn test_db_backend<T: OutputManagerBackend + 'static>(backend: T) {
 
     // Set first pending tx to mined but unconfirmed
     let mut mmr_pos = 0;
-    for o in pending_txs[0].outputs_to_be_received.iter() {
+    for o in &pending_txs[0].outputs_to_be_received {
         runtime
             .block_on(db.set_received_output_mined_height(o.hash.clone(), 2, vec![], mmr_pos, false))
             .unwrap();
         mmr_pos += 1;
     }
-    for o in pending_txs[0].outputs_to_be_spent.iter() {
+    for o in &pending_txs[0].outputs_to_be_spent {
         runtime
             .block_on(db.mark_output_as_spent(o.hash.clone(), 3, vec![], false))
             .unwrap();
@@ -198,13 +198,13 @@ pub fn test_db_backend<T: OutputManagerBackend + 'static>(backend: T) {
     });
 
     // Set second pending tx to mined and confirmed
-    for o in pending_txs[1].outputs_to_be_received.iter() {
+    for o in &pending_txs[1].outputs_to_be_received {
         runtime
             .block_on(db.set_received_output_mined_height(o.hash.clone(), 4, vec![], mmr_pos, true))
             .unwrap();
         mmr_pos += 1;
     }
-    for o in pending_txs[1].outputs_to_be_spent.iter() {
+    for o in &pending_txs[1].outputs_to_be_spent {
         runtime
             .block_on(db.mark_output_as_spent(o.hash.clone(), 5, vec![], true))
             .unwrap();
