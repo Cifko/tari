@@ -337,7 +337,7 @@ where
                     let (request, reply_tx) = request_context.split();
                     let event = format!("Handling Service API Request ({})", request);
                     trace!(target: LOG_TARGET, "{}", event);
-                    let _ = self.handle_request(request,
+                    let _result = self.handle_request(request,
                         &mut send_transaction_protocol_handles,
                         &mut receive_transaction_protocol_handles,
                         &mut transaction_broadcast_protocol_handles,
@@ -371,7 +371,7 @@ where
                         Err(e) => {
                             warn!(target: LOG_TARGET, "Failed to handle incoming Transaction message: {} for NodeID: {}, Trace: {}",
                                 e, self.node_identity.node_id().short_str(), msg.dht_header.message_tag);
-                            let _ = self.event_publisher.send(Arc::new(TransactionEvent::Error(format!("Error handling \
+                            let _size = self.event_publisher.send(Arc::new(TransactionEvent::Error(format!("Error handling \
                                 Transaction Sender message: {:?}", e).to_string())));
                         }
                         _ => (),
@@ -401,7 +401,7 @@ where
                             warn!(target: LOG_TARGET, "Failed to handle incoming Transaction Reply message: {} \
                             for NodeId: {}, Trace: {}", e, self.node_identity.node_id().short_str(),
                             msg.dht_header.message_tag);
-                            let _ = self.event_publisher.send(Arc::new(TransactionEvent::Error("Error handling \
+                            let _size = self.event_publisher.send(Arc::new(TransactionEvent::Error("Error handling \
                             Transaction Recipient Reply message".to_string())));
                         },
                         Ok(_) => (),
@@ -438,7 +438,7 @@ where
                             warn!(target: LOG_TARGET, "Failed to handle incoming Transaction Finalized message: {} \
                             for NodeID: {}, Trace: {}", e , self.node_identity.node_id().short_str(),
                             msg.dht_header.message_tag.as_value());
-                            let _ = self.event_publisher.send(Arc::new(TransactionEvent::Error("Error handling Transaction \
+                            let _size = self.event_publisher.send(Arc::new(TransactionEvent::Error("Error handling Transaction \
                             Finalized message".to_string(),)));
                        },
                        Ok(_) => ()
@@ -455,7 +455,7 @@ where
                     let start = Instant::now();
                     let (origin_public_key, inner_msg) = msg.clone().into_origin_and_inner();
                     trace!(target: LOG_TARGET, "Handling Base Node Response, Trace: {}", msg.dht_header.message_tag);
-                    let _ = self.handle_base_node_response(inner_msg).await.map_err(|e| {
+                    let _result = self.handle_base_node_response(inner_msg).await.map_err(|e| {
                         warn!(target: LOG_TARGET, "Error handling base node service response from {}: {:?} for \
                         NodeID: {}, Trace: {}", origin_public_key, e, self.node_identity.node_id().short_str(),
                         msg.dht_header.message_tag.as_value());
@@ -721,7 +721,7 @@ where
 
         // If the individual handlers did not already send the API response then do it here.
         if let Some(rp) = reply_channel {
-            let _ = rp.send(response).map_err(|e| {
+            let _result = rp.send(response).map_err(|e| {
                 warn!(target: LOG_TARGET, "Failed to send reply");
                 e
             });
@@ -745,7 +745,7 @@ where
                 };
 
                 if trigger_validation {
-                    let _ = self
+                    let _operation_id = self
                         .start_transaction_validation_protocol(transaction_validation_join_handles)
                         .await
                         .map_err(|e| {
@@ -823,7 +823,7 @@ where
                 .await?;
 
             // Notify that the transaction was successfully resolved.
-            let _ = self
+            let _size = self
                 .event_publisher
                 .send(Arc::new(TransactionEvent::TransactionCompletedImmediately(tx_id)));
 
@@ -846,7 +846,7 @@ where
             )
             .await?;
 
-            let _ = reply_channel
+            let _result = reply_channel
                 .send(Ok(TransactionServiceResponse::TransactionSent(tx_id)))
                 .map_err(|e| {
                     warn!(target: LOG_TARGET, "Failed to send service reply");
@@ -938,7 +938,7 @@ where
 
         // This call is needed to advance the state from `SingleRoundMessageReady` to `SingleRoundMessageReady`,
         // but the returned value is not used
-        let _ = stp
+        let _single_round_sender_data = stp
             .build_single_round_message()
             .map_err(|e| TransactionServiceProtocolError::new(tx_id, e.into()))?;
 
@@ -1018,7 +1018,7 @@ where
 
         // This event being sent is important, but not critical to the protocol being successful. Send only fails if
         // there are no subscribers.
-        let _ = self
+        let _size = self
             .event_publisher
             .send(Arc::new(TransactionEvent::TransactionCompletedImmediately(tx_id)));
 
@@ -1104,7 +1104,7 @@ where
 
         // This call is needed to advance the state from `SingleRoundMessageReady` to `SingleRoundMessageReady`,
         // but the returned value is not used
-        let _ = stp
+        let _single_round_sender_data = stp
             .build_single_round_message()
             .map_err(|e| TransactionServiceProtocolError::new(tx_id, e.into()))?;
 
@@ -1170,7 +1170,7 @@ where
 
         // This event being sent is important, but not critical to the protocol being successful. Send only fails if
         // there are no subscribers.
-        let _ = self
+        let _result = self
             .event_publisher
             .send(Arc::new(TransactionEvent::TransactionCompletedImmediately(tx_id)));
 
@@ -1346,8 +1346,8 @@ where
     ) {
         match join_result {
             Ok(id) => {
-                let _ = self.pending_transaction_reply_senders.remove(&id);
-                let _ = self.send_transaction_cancellation_senders.remove(&id);
+                let _public_key = self.pending_transaction_reply_senders.remove(&id);
+                let _result = self.send_transaction_cancellation_senders.remove(&id);
                 let completed_tx = match self.db.get_completed_transaction(id).await {
                     Ok(v) => v,
                     Err(e) => {
@@ -1358,7 +1358,7 @@ where
                         return;
                     },
                 };
-                let _ = self
+                let _result = self
                     .broadcast_completed_transaction(completed_tx, transaction_broadcast_join_handles)
                     .await
                     .map_err(|resp| {
@@ -1375,8 +1375,8 @@ where
                 );
             },
             Err(TransactionServiceProtocolError { id, error }) => {
-                let _ = self.pending_transaction_reply_senders.remove(&id);
-                let _ = self.send_transaction_cancellation_senders.remove(&id);
+                let _public_key = self.pending_transaction_reply_senders.remove(&id);
+                let _result = self.send_transaction_cancellation_senders.remove(&id);
                 if let TransactionServiceError::Shutdown = error {
                     return;
                 }
@@ -1384,7 +1384,7 @@ where
                     target: LOG_TARGET,
                     "Error completing Send Transaction Protocol (Id: {}): {:?}", id, error
                 );
-                let _ = self
+                let _size = self
                     .event_publisher
                     .send(Arc::new(TransactionEvent::Error(format!("{:?}", error))));
             },
@@ -1404,16 +1404,16 @@ where
         self.output_manager_service.cancel_transaction(tx_id).await?;
 
         if let Some(cancellation_sender) = self.send_transaction_cancellation_senders.remove(&tx_id) {
-            let _ = cancellation_sender.send(());
+            let _result = cancellation_sender.send(());
         }
-        let _ = self.pending_transaction_reply_senders.remove(&tx_id);
+        let _public_key = self.pending_transaction_reply_senders.remove(&tx_id);
 
         if let Some(cancellation_sender) = self.receiver_transaction_cancellation_senders.remove(&tx_id) {
-            let _ = cancellation_sender.send(());
+            let _result = cancellation_sender.send(());
         }
-        let _ = self.finalized_transaction_senders.remove(&tx_id);
+        let _public_key = self.finalized_transaction_senders.remove(&tx_id);
 
-        let _ = self
+        let _size = self
             .event_publisher
             .send(Arc::new(TransactionEvent::TransactionCancelled(
                 tx_id,
@@ -1706,8 +1706,8 @@ where
     ) {
         match join_result {
             Ok(id) => {
-                let _ = self.finalized_transaction_senders.remove(&id);
-                let _ = self.receiver_transaction_cancellation_senders.remove(&id);
+                let _public_key = self.finalized_transaction_senders.remove(&id);
+                let _result = self.receiver_transaction_cancellation_senders.remove(&id);
 
                 let completed_tx = match self.db.get_completed_transaction(id).await {
                     Ok(v) => v,
@@ -1719,7 +1719,7 @@ where
                         return;
                     },
                 };
-                let _ = self
+                let _result = self
                     .broadcast_completed_transaction(completed_tx, transaction_broadcast_join_handles)
                     .await
                     .map_err(|e| {
@@ -1737,8 +1737,8 @@ where
                 );
             },
             Err(TransactionServiceProtocolError { id, error }) => {
-                let _ = self.finalized_transaction_senders.remove(&id);
-                let _ = self.receiver_transaction_cancellation_senders.remove(&id);
+                let _public_key = self.finalized_transaction_senders.remove(&id);
+                let _result = self.receiver_transaction_cancellation_senders.remove(&id);
                 match error {
                     TransactionServiceError::RepeatedMessageError => debug!(
                         target: LOG_TARGET,
@@ -1755,7 +1755,7 @@ where
                     ),
                 }
 
-                let _ = self
+                let _size = self
                     .event_publisher
                     .send(Arc::new(TransactionEvent::Error(format!("{:?}", error))));
             },
@@ -1905,7 +1905,7 @@ where
                     target: LOG_TARGET,
                     "Error completing Transaction Validation Protocol (id: {}): {:?}", id, error
                 );
-                let _ = self
+                let _size = self
                     .event_publisher
                     .send(Arc::new(TransactionEvent::TransactionValidationFailed(id)));
             },
@@ -2023,7 +2023,7 @@ where
                     target: LOG_TARGET,
                     "Error completing Transaction Broadcast Protocol (Id: {}): {:?}", id, error
                 );
-                let _ = self
+                let _size = self
                     .event_publisher
                     .send(Arc::new(TransactionEvent::Error(format!("{:?}", error))));
             },
@@ -2097,7 +2097,7 @@ where
             },
             ImportStatus::FauxConfirmed => TransactionEvent::FauxTransactionConfirmed { tx_id, is_valid: true },
         };
-        let _ = self.event_publisher.send(Arc::new(transaction_event)).map_err(|e| {
+        let _size = self.event_publisher.send(Arc::new(transaction_event)).map_err(|e| {
             trace!(
                 target: LOG_TARGET,
                 "Error sending event, usually because there are no subscribers: {:?}",
@@ -2224,7 +2224,7 @@ where
                     )
                     .await?;
 
-                let _ = self
+                let _size = self
                     .resources
                     .event_publisher
                     .send(Arc::new(TransactionEvent::ReceivedFinalizedTransaction(tx_id)))

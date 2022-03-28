@@ -169,7 +169,7 @@ impl tari_rpc::base_node_server::BaseNode for BaseNodeGrpcServer {
                 };
 
                 if headers.is_empty() {
-                    let _ = tx.send(Err(Status::invalid_argument(format!(
+                    let _network_difficulty_response = tx.send(Err(Status::invalid_argument(format!(
                         "No blocks found within range {} - {}",
                         start, end
                     ))));
@@ -434,7 +434,7 @@ impl tari_rpc::base_node_server::BaseNode for BaseNodeGrpcServer {
                 Ok(tokens) => tokens,
                 Err(err) => {
                     warn!(target: LOG_TARGET, "Error communicating with base node: {:?}", err,);
-                    let _ = tx.send(Err(Status::internal("Internal error")));
+                    let _get_token_response = tx.send(Err(Status::internal("Internal error")));
                     return;
                 },
             };
@@ -451,7 +451,8 @@ impl tari_rpc::base_node_server::BaseNode for BaseNodeGrpcServer {
                     Ok(f) => f,
                     Err(err) => {
                         warn!(target: LOG_TARGET, "Could not convert features: {}", err,);
-                        let _ = tx.send(Err(Status::internal(format!("Could not convert features:{}", err))));
+                        let _get_token_response =
+                            tx.send(Err(Status::internal(format!("Could not convert features:{}", err))));
                         break;
                     },
                 };
@@ -577,7 +578,7 @@ impl tari_rpc::base_node_server::BaseNode for BaseNodeGrpcServer {
                 Ok(outputs) => outputs,
                 Err(err) => {
                     warn!(target: LOG_TARGET, "Error communicating with base node: {:?}", err,);
-                    let _ = tx.send(Err(Status::internal("Internal error")));
+                    let _list_assest_registrations_response = tx.send(Err(Status::internal("Internal error")));
                     return;
                 },
             };
@@ -597,7 +598,8 @@ impl tari_rpc::base_node_server::BaseNode for BaseNodeGrpcServer {
                     Ok(f) => f,
                     Err(err) => {
                         warn!(target: LOG_TARGET, "Could not convert features: {}", err,);
-                        let _ = tx.send(Err(Status::internal(format!("Could not convert features:{}", err))));
+                        let _list_assest_registrations_response =
+                            tx.send(Err(Status::internal(format!("Could not convert features:{}", err))));
                         break;
                     },
                 };

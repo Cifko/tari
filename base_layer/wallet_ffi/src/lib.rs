@@ -230,7 +230,7 @@ pub struct TariWallet {
 #[no_mangle]
 pub unsafe extern "C" fn string_destroy(ptr: *mut c_char) {
     if !ptr.is_null() {
-        let _ = CString::from_raw(ptr);
+        let _string = CString::from_raw(ptr);
     }
 }
 

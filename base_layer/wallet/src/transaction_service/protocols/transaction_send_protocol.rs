@@ -195,7 +195,7 @@ where
             .await
         {
             Ok(sp) => {
-                let _ = service_reply_channel
+                let _result = service_reply_channel
                     .send(Ok(TransactionServiceResponse::TransactionSent(self.id)))
                     .map_err(|e| {
                         warn!(target: LOG_TARGET, "Failed to send service reply");
@@ -205,7 +205,7 @@ where
             },
             Err(e) => {
                 let error_string = e.to_string();
-                let _ = service_reply_channel
+                let _size = service_reply_channel
                     .send(Err(TransactionServiceError::from(e)))
                     .map_err(|e| {
                         warn!(target: LOG_TARGET, "Failed to send service reply");
@@ -286,14 +286,14 @@ where
                 .map_err(|e| TransactionServiceProtocolError::new(self.id, TransactionServiceError::from(e)))?;
         }
 
-        let _ = self
+        let _size = self
             .resources
             .event_publisher
             .send(Arc::new(TransactionEvent::TransactionDirectSendResult(
                 self.id,
                 direct_send_result,
             )));
-        let _ = self
+        let _size = self
             .resources
             .event_publisher
             .send(Arc::new(TransactionEvent::TransactionStoreForwardSendResult(
@@ -540,7 +540,7 @@ where
             .await
             .map_err(|e| TransactionServiceProtocolError::new(self.id, TransactionServiceError::from(e)))?;
 
-        let _ = self
+        let _size = self
             .resources
             .event_publisher
             .send(Arc::new(TransactionEvent::ReceivedTransactionReply(tx_id)))
@@ -641,7 +641,7 @@ where
                     store_and_forward_send_result = self.send_transaction_store_and_forward(msg.clone()).await?;
                 },
                 SendMessageResponse::PendingDiscovery(rx) => {
-                    let _ = self
+                    let _size = self
                         .resources
                         .event_publisher
                         .send(Arc::new(TransactionEvent::TransactionDiscoveryInProgress(self.id)));
@@ -801,7 +801,7 @@ where
             .await
             .map_err(|e| TransactionServiceProtocolError::new(self.id, TransactionServiceError::from(e)))?;
 
-        let _ = self
+        let _size = self
             .resources
             .event_publisher
             .send(Arc::new(TransactionEvent::TransactionCancelled(

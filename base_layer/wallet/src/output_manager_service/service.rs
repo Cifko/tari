@@ -234,7 +234,7 @@ where
                         warn!(target: LOG_TARGET, "Error handling request: {:?}", e);
                         e
                     });
-                    let _ = reply_tx.send(response).map_err(|e| {
+                    let _result = reply_tx.send(response).map_err(|e| {
                         warn!(target: LOG_TARGET, "Failed to send reply");
                         e
                     });
@@ -545,7 +545,7 @@ where
                     _ => false,
                 };
                 if trigger_validation {
-                    let _ = self.validate_outputs().map_err(|e| {
+                    let _id = self.validate_outputs().map_err(|e| {
                         warn!(target: LOG_TARGET, "Error validating  txos: {:?}", e);
                         e
                     });
