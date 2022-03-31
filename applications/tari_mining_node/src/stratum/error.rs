@@ -45,7 +45,7 @@ pub enum Error {
     #[error("Can't create TLS connector: {0}")]
     Tls(#[from] native_tls::Error),
     #[error("Can't establish TLS connection: {0}")]
-    Tcp(#[from] native_tls::HandshakeError<std::net::TcpStream>),
+    Tcp(#[from] Box<native_tls::HandshakeError<std::net::TcpStream>>),
     #[error("No connected stream")]
     NotConnected,
     #[error("Can't parse int: {0}")]

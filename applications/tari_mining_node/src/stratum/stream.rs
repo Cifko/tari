@@ -33,7 +33,7 @@ use crate::stratum::error::Error;
 
 pub(crate) enum Stream {
     Stream(BufStream<TcpStream>),
-    TlsStream(BufStream<TlsStream<TcpStream>>),
+    TlsStream(Box<BufStream<TlsStream<TcpStream>>>),
 }
 
 impl Stream {
@@ -44,9 +44,9 @@ impl Stream {
             let url_port: Vec<&str> = server_url.split(':').collect();
             let split_url: Vec<&str> = url_port[0].split('.').collect();
             let base_host = format!("{}.{}", split_url[split_url.len() - 2], split_url[split_url.len() - 1]);
-            let mut stream = connector.connect(&base_host, conn)?;
+            let mut stream = connector.connect(&base_host, conn).map_err(Box::new)?;
             stream.get_mut().set_nonblocking(true)?;
-            Ok(Self::TlsStream(BufStream::new(stream)))
+            Ok(Self::TlsStream(Box::new(BufStream::new(stream))))
         } else {
             conn.set_nonblocking(true)?;
             Ok(Self::Stream(BufStream::new(conn)))
